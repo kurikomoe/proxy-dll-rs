@@ -1,0 +1,34 @@
+pub(crate) mod proxy {
+    use std::arch::naked_asm;
+    use std::ffi::c_void;
+    use windows::core::{s, w};
+    use windows::Win32::Foundation::HMODULE;
+    use windows::Win32::System::LibraryLoader::{GetProcAddress, LoadLibraryW};
+
+    #[unsafe(no_mangle)]
+    static mut hDll: HMODULE = HMODULE(std::ptr::null_mut());
+
+    {{#each func_names}}
+    #[unsafe(no_mangle)]
+    static mut o_{{this.name}}: *const c_void = std::ptr::null();
+
+    #[unsafe(naked)]
+    #[unsafe(no_mangle)]
+    unsafe extern "system" fn f_{{this.name}}() {
+        naked_asm!(
+            "jmp [rip + {}]",
+            sym o_{{this.name}},
+        );
+    }
+    {{/each}}
+
+    pub(crate) unsafe fn setup_redirection() {
+        unsafe {
+            hDll = LoadLibraryW(w!(r#"{{dll_path}}"#)).unwrap();
+
+            {{#each func_names}}
+            o_{{this.name}} = GetProcAddress(hDll, s!("{{this.name}}")).unwrap() as *const c_void;
+            {{/each}}
+        }
+    }
+}
