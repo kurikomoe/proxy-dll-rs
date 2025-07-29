@@ -12,7 +12,7 @@ The crate can ease you burden in creating a proxy dll to do dll injection.
 
 ### Usage
 
-First, import the crate to your crate
+First, import the crate to your `cdylib` lib
 
 ```shell
 $ cargo add --git https://github.com/kurikomoe/proxy-dll-rs.git proxy_dll
@@ -43,15 +43,15 @@ extern "system" fn dll_main(_: HINSTANCE, reason: u32, _reserved: isize) -> i32 
 
 ```
 
-Finally, built the dll with env:
+Finally, build the dll with env vars:
 
 ```shell
 $ PROXY_DLL_TARGET=version.dll PROXY_DLL_USE_ORIG=false cargo build
-// PROXY_DLL_TARGET: the target dll to be proxied
+// PROXY_DLL_TARGET: the target dll to be proxied, default version.dll
 // PROXY_DLL_TARGET_PATH (optional): the target dll path
 // PROXY_DLL_USE_ORIG: should the target dll be loaded via ${NAME}_orig.dll
 
-// ALERT, you can find the `$name.dll` in your root folder, not under `target/$PROFIEL/`
+// `ALERT`, you can find the `$name.dll` in your root folder, not under `target/$PROFIEL/`
 ```
 
 
@@ -80,7 +80,7 @@ Then:
 ```shell
 PROXY_DLL_TARGET=version.dll  PROXY_DLL_USE_ORIG=0
 test.exe  version.dll
-// version.dll is the `proxy dll`, it will load version.dll (from C:\Windows\xx by default)
+// version.dll is the `proxy dll`, it will load version.dll (same as the LoadLibray load path)
 
 PROXY_DLL_TARGET=version.dll  PROXY_DLL_USE_ORIG=1
 test.exe  version.dll version_orig.dll 
