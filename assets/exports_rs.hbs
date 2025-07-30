@@ -15,8 +15,14 @@ pub(crate) mod proxy {
     #[unsafe(naked)]
     #[unsafe(no_mangle)]
     unsafe extern "system" fn f_{{this.name}}() {
+        #[cfg(target_arch = "x86_64")]
         naked_asm!(
             "jmp [rip + {}]",
+            sym o_{{this.name}},
+        );
+        #[cfg(target_arch = "x86")]
+        naked_asm!(
+            "jmp [{}]",
             sym o_{{this.name}},
         );
     }
